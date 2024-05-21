@@ -24,7 +24,7 @@ def MenuInicio():
     print(tablaProcesoFIFO)   # se imprime el dataframe
     FIFO(tablaProcesoFIFO)
 
-# cambiar esta funcion por round robin
+# cambiar esta funcion popr round robin
 def FIFO(datos):
     colores = ["blue","red","green","cyan","brown","purple","olive","gray","orange"]
     datos = datos.sort_values(by="Tiempo llegada", ascending=True)
