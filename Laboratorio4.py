@@ -38,12 +38,19 @@ def round_robin(datos, quantum, switch_time):
     print(datos)
     fig, ax = plt.subplots()
     c = 0
-    queue = list(range(len(datos)))
+    queue = list(range(len(datos))) # creacion cola de procesos
+    added_to_graph = [False] * len(datos)  # lista para verificar que proceso ha sido añadido a la grafica (para las etiquetas)
     while queue:
         print("Cola de procesos:", [datos.iloc[process]["Proceso"] for process in queue])  # imprimir la cola de procesos
         i = queue.pop(0)
         row = datos.iloc[i]
         color = color_map[datos.iloc[i]["Proceso"]] # Asignar color al proceso, tomando en cuenta el diccionario
+
+        # añadir etiquetas
+        if not added_to_graph[i]:  # verifica si el proceso no ha sido añadido a la grafica antes (para no repetir etiquetas)
+            ax.annotate("P" + str(i), (c, 10 * i + 5), fontsize=9, ha='left', color='black')  # Add the label
+            added_to_graph[i] = True  # Mark the process as added to the graph
+
         if row["NCPU"] > quantum:
             c, ax, datos = CrearGrafica(datos, i, row, ax, c, color, quantum, switch_time)
             datos.at[i, "NCPU"] -= quantum
@@ -51,7 +58,6 @@ def round_robin(datos, quantum, switch_time):
         else:
             c, ax, datos = CrearGrafica(datos, i, row, ax, c, color, row["NCPU"], switch_time)
         Tp = datos.at[i, "CPU Primera Vez"]
-        ax.annotate("P" + str(i)  + "=" + str(row["NCPU"]), (int((Tp +c )/2), 10 * i + 5), fontsize=9, ha='center', color='black')
 
     ax.set_ylim(0, 50)
     ax.set_xlim(0, )
