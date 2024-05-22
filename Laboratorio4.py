@@ -4,7 +4,7 @@ import random
 
 # funcion para el menu de inicio
 def MenuInicio():
-    print("Round Robin:")
+    print("Round Robin")
 
     datosRR = []    # lista para almacenar los datos de los procesos
     n_procesos = ValidarDato("Cantidad de procesos: ",1)
@@ -86,13 +86,9 @@ def CrearGrafica(datos, index, row, ax, c, color, quantum, switch_time):
 # funcion para calcular los tiempos de vuelta y espera
 def CalcularDatos(datos):
     for index, row in datos.iterrows():
-        datos.at[index,"Tiempo vuelta"] =  (int(row["CPU Primera Vez"]) +int(row["NCPU"])) - 0 - row["Tiempo llegada"]
+        datos.at[index,"Tiempo vuelta"] = (int(row["CPU Primera Vez"]) +int(row["NCPU"])) - 0 - row["Tiempo llegada"]
         datos.at[index,"Tiempo espera"] = row["CPU Primera Vez"] - row["Tiempo llegada"]
     return datos
-
-# funcion para visualizar la cola de prioridad
-def ColaPrioridad(datos):
-    pass
 
 # funcion para validar los datos de entrada
 def ValidarDato(mensaje,opcion):
