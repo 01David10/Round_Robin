@@ -4,9 +4,9 @@ import random
 
 # funcion para el menu de inicio
 def MenuInicio():
-    print("Round Robin:")
+    print("FIFO:")
 
-    datosRR = []    # lista para almacenar los datos de los procesos
+    datosFIFO = []    # lista para almacenar los datos de los procesos
     n_procesos = ValidarDato("Cantidad de procesos: ",1)
 
     for i in range(n_procesos):
@@ -17,14 +17,13 @@ def MenuInicio():
             "Tiempo llegada" : tiempo_llegada,
             "NCPU" : NCPU
         }
-        datosRR.append(formato) # se agrega el objeto a la lista
+        datosFIFO.append(formato) # se agrega el objeto a la lista
 
-    tablaProcesoFIFO = pd.DataFrame(datosRR)    # se convierte la lista en un dataframe
+    tablaProcesoFIFO = pd.DataFrame(datosFIFO)    # se convierte la lista en un dataframe
     print("\nDatos ingresados: ")
     print(tablaProcesoFIFO)   # se imprime el dataframe
     FIFO(tablaProcesoFIFO)
 
-# cambiar esta funcion popr round robin
 def FIFO(datos):
     colores = ["blue","red","green","cyan","brown","purple","olive","gray","orange"]
     datos = datos.sort_values(by="Tiempo llegada", ascending=True)
@@ -50,7 +49,6 @@ def FIFO(datos):
     print("Tiempo vuelta en promedio: %s" % datos["Tiempo vuelta"].mean())
     print("Tiempo vuelta en espera: %s" % datos["Tiempo espera"].mean())
 
-# modificarla para que quede con los intercambios
 def CrearGrafica(datos,index,row,ax,c, color):
     tiempo_llegada = int(row["Tiempo llegada"])
     if(tiempo_llegada == 0):
@@ -73,10 +71,6 @@ def CalcularDatos(datos):
         datos.at[index,"Tiempo espera"] = row["CPU Primera Vez"] - row["Tiempo llegada"]
     return datos
 
-# funcion para visualizar la cola de prioridad
-def ColaPrioridad(datos):
-    pass
-
 # funcion para validar los datos de entrada
 def ValidarDato(mensaje,opcion):
     while True:
@@ -95,5 +89,6 @@ def ValidarDato(mensaje,opcion):
         except ValueError:
             print("Por favor ingrese un valor numerico")
 
+# main
 if __name__ == "__main__":
     MenuInicio()
