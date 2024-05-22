@@ -31,8 +31,8 @@ def MenuInicio():
 
 # cambiar esta funcion por round robin
 def round_robin(datos, quantum, switch_time):
-    colores_originales = ["blue","red","green","cyan","brown","purple","olive","gray","orange"]
-    colores = colores_originales.copy()
+    colores = ["blue","red","green","cyan","brown","purple","olive","gray","orange"]
+    color_map = {process: color for process, color in zip(datos["Proceso"], colores)}   # diccionario para asignar colores a los procesos
     datos = datos.sort_values(by="Tiempo llegada", ascending=True)
     print("\n--------------- DATOS ORDENADOS -----------------------------")
     print(datos)
@@ -43,10 +43,7 @@ def round_robin(datos, quantum, switch_time):
         print("Cola de procesos:", [datos.iloc[process]["Proceso"] for process in queue])  # imprimir la cola de procesos
         i = queue.pop(0)
         row = datos.iloc[i]
-        color = random.choice(colores)
-        colores.remove(color)
-        if not colores:  # If colores is empty
-            colores = colores_originales.copy()  # Reset colores to its original state
+        color = color_map[datos.iloc[i]["Proceso"]] # Asignar color al proceso, tomando en cuenta el diccionario
         if row["NCPU"] > quantum:
             c, ax, datos = CrearGrafica(datos, i, row, ax, c, color, quantum, switch_time)
             datos.at[i, "NCPU"] -= quantum
