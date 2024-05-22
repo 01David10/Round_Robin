@@ -40,6 +40,7 @@ def round_robin(datos, quantum, switch_time):
     c = 0
     queue = list(range(len(datos)))
     while queue:
+        print("Cola de procesos:", [datos.iloc[process]["Proceso"] for process in queue])  # imprimir la cola de procesos
         i = queue.pop(0)
         row = datos.iloc[i]
         color = random.choice(colores)
