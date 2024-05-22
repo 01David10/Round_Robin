@@ -51,7 +51,7 @@ def round_robin(datos, quantum, switch_time):
         else:
             c, ax, datos = CrearGrafica(datos, i, row, ax, c, color, row["NCPU"], switch_time)
         Tp = datos.at[i, "CPU Primera Vez"]
-        ax.annotate("P" + str(i)  + "=" + str(row["NCPU"]), (int((Tp +c )/2), 12), fontsize=9, ha='center', color='black')
+        ax.annotate("P" + str(i)  + "=" + str(row["NCPU"]), (int((Tp +c )/2), 10 * i + 5), fontsize=9, ha='center', color='black')
 
     ax.set_ylim(0, 50)
     ax.set_xlim(0, )
