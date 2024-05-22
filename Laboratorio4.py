@@ -48,8 +48,8 @@ def round_robin(datos, quantum, switch_time):
 
         # añadir etiquetas
         if not added_to_graph[i]:  # verifica si el proceso no ha sido añadido a la grafica antes (para no repetir etiquetas)
-            ax.annotate("P" + str(i), (c, 10 * i + 5), fontsize=9, ha='left', color='black')  # Add the label
-            added_to_graph[i] = True  # Mark the process as added to the graph
+            ax.annotate("P" + str(i), (c, 15), fontsize=9, ha='left', color=color)  # añade la etiqueta al proceso
+            added_to_graph[i] = True  # marca el proceso como añadido
 
         if row["NCPU"] > quantum:
             c, ax, datos = CrearGrafica(datos, i, row, ax, c, color, quantum, switch_time)
@@ -75,7 +75,7 @@ def CrearGrafica(datos, index, row, ax, c, color, quantum, switch_time):
     tiempo_llegada = int(row["Tiempo llegada"])
     if tiempo_llegada > c:
         c = tiempo_llegada
-    ax.broken_barh([(c, quantum)], (10*index, 9), facecolors=color)
+    ax.broken_barh([(c, quantum)], (0, 9), facecolors=color)
     c += quantum
     c += switch_time
     if pd.isna(row["CPU Primera Vez"]) or row["CPU Primera Vez"] is None:  # Add this condition
