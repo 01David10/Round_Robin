@@ -15,29 +15,45 @@ def MenuInicio():
         formato = {     # estructura del objeto
             "Proceso" : f"P{i}",
             "Tiempo llegada" : tiempo_llegada,
-            "NCPU" : NCPU
+            "NCPU" : NCPU,
+            "CPU Primera Vez": None,  
+            "CPU Ultima Vez": None    
         }
         datosRR.append(formato) # se agrega el objeto a la lista
 
-    tablaProcesoFIFO = pd.DataFrame(datosRR)    # se convierte la lista en un dataframe
+    tablaProcesoRR = pd.DataFrame(datosRR)    # se convierte la lista en un dataframe
     print("\nDatos ingresados: ")
-    print(tablaProcesoFIFO)   # se imprime el dataframe
-    FIFO(tablaProcesoFIFO)
+    print(tablaProcesoRR)   # se imprime el dataframe
+
+    quantum = ValidarDato("Ingrese el quantum: ", 1)  # preguntar cuantos Q tiene cada proceso
+    switch_time = ValidarDato("Ingrese el tiempo de intercambio: ", 1)  # preguntar cuantos quantum dura el intercambio
+    round_robin(tablaProcesoRR, quantum, switch_time)
 
 # cambiar esta funcion por round robin
-def FIFO(datos):
-    colores = ["blue","red","green","cyan","brown","purple","olive","gray","orange"]
+def round_robin(datos, quantum, switch_time):
+    colores_originales = ["blue","red","green","cyan","brown","purple","olive","gray","orange"]
+    colores = colores_originales.copy()
     datos = datos.sort_values(by="Tiempo llegada", ascending=True)
     print("\n--------------- DATOS ORDENADOS -----------------------------")
     print(datos)
     fig, ax = plt.subplots()
     c = 0
-    for index, row in datos.iterrows():
+    queue = list(range(len(datos)))
+    while queue:
+        i = queue.pop(0)
+        row = datos.iloc[i]
         color = random.choice(colores)
         colores.remove(color)
-        c, ax, datos = CrearGrafica(datos,index,row,ax,c,color)
-        Tp = datos.at[index,"CPU Primera Vez"]
-        ax.annotate("P" + str(index)  + "=" + str(row["NCPU"]), (int((Tp +c )/2), 12), fontsize=9, ha='center', color='black')
+        if not colores:  # If colores is empty
+            colores = colores_originales.copy()  # Reset colores to its original state
+        if row["NCPU"] > quantum:
+            c, ax, datos = CrearGrafica(datos, i, row, ax, c, color, quantum, switch_time)
+            datos.at[i, "NCPU"] -= quantum
+            queue.append(i)        
+        else:
+            c, ax, datos = CrearGrafica(datos, i, row, ax, c, color, row["NCPU"], switch_time)
+        Tp = datos.at[i, "CPU Primera Vez"]
+        ax.annotate("P" + str(i)  + "=" + str(row["NCPU"]), (int((Tp +c )/2), 12), fontsize=9, ha='center', color='black')
 
     ax.set_ylim(0, 50)
     ax.set_xlim(0, )
@@ -51,20 +67,17 @@ def FIFO(datos):
     print("Tiempo vuelta en espera: %s" % datos["Tiempo espera"].mean())
 
 # modificarla para que quede con los intercambios
-def CrearGrafica(datos,index,row,ax,c, color):
+def CrearGrafica(datos, index, row, ax, c, color, quantum, switch_time):
     tiempo_llegada = int(row["Tiempo llegada"])
-    if(tiempo_llegada == 0):
-        ax.broken_barh([(index, int(row["NCPU"]))], (0,10), facecolors='tab:' + color)
-    else:
-        if(tiempo_llegada > c):
-            ax.broken_barh([(tiempo_llegada,int(row["NCPU"]))], (0,10), facecolors='tab:'+ color)
-            c =  tiempo_llegada
-        else:
-            ax.broken_barh([(c,int(row["NCPU"]))], (0,10), facecolors='tab:'+ color)
-
-    datos.at[index,"CPU Primera Vez"] = c
-    c = c + int(row["NCPU"])
-    return c,ax,datos
+    if tiempo_llegada > c:
+        c = tiempo_llegada
+    ax.broken_barh([(c, quantum)], (10*index, 9), facecolors=color)
+    c += quantum
+    c += switch_time
+    if pd.isna(row["CPU Primera Vez"]) or row["CPU Primera Vez"] is None:  # Add this condition
+        datos.at[index, "CPU Primera Vez"] = c
+    datos.at[index, "CPU Ultima Vez"] = c
+    return c, ax, datos
 
 # funcion para calcular los tiempos de vuelta y espera
 def CalcularDatos(datos):
