@@ -11,8 +11,11 @@ def MenuInicio():
 
     for i in range(n_procesos):
         tiempo_llegada = ValidarDato(f"Tiempo de llegada para P{i}: ",0)
+        tiempo_llegada = tiempo_llegada*50 # se convierte a milisegundos
         NCPU = ValidarDato(f"NCPU para P{i}: ",1)
-        formato = {     # estructura del objeto
+        NCPU = NCPU*50 # se convierte a milisegundos
+        # estructura del objeto
+        formato = {     
             "Proceso" : f"P{i}",
             "Tiempo llegada" : tiempo_llegada,
             "NCPU" : NCPU,
@@ -22,11 +25,12 @@ def MenuInicio():
         datosRR.append(formato) # se agrega el objeto a la lista
 
     tablaProcesoRR = pd.DataFrame(datosRR)    # se convierte la lista en un dataframe
+
     print("\nDatos ingresados: ")
     print(tablaProcesoRR)   # se imprime el dataframe
 
-    quantum = ValidarDato("Ingrese el quantum: ", 1)  # preguntar cuantos Q tiene cada proceso
-    switch_time = ValidarDato("Ingrese el tiempo de intercambio: ", 1)  # preguntar cuantos quantum dura el intercambio
+    quantum = 50 # cada Q equivale a 50 milisegundos
+    switch_time = 10    # tiempo de intercambio (milisegundos)
     round_robin(tablaProcesoRR, quantum, switch_time)
 
 # cambiar esta funcion por round robin
@@ -34,14 +38,14 @@ def round_robin(datos, quantum, switch_time):
     colores = ["blue","red","green","cyan","brown","purple","olive","gray","orange"]
     color_map = {process: color for process, color in zip(datos["Proceso"], colores)}   # diccionario para asignar colores a los procesos
     datos = datos.sort_values(by="Tiempo llegada", ascending=True)
-    print("\n--------------- DATOS ORDENADOS -----------------------------")
-    print(datos)
     fig, ax = plt.subplots()
     c = 0
     queue = list(range(len(datos))) # creacion cola de procesos
     added_to_graph = [False] * len(datos)  # lista para verificar que proceso ha sido añadido a la grafica (para las etiquetas)
+
+    print("\nCola de procesos:")
     while queue:
-        print("Cola de procesos:", [datos.iloc[process]["Proceso"] for process in queue])  # imprimir la cola de procesos
+        print([datos.iloc[process]["Proceso"] for process in queue])  # imprimir la cola de procesos
         i = queue.pop(0)
         row = datos.iloc[i]
         color = color_map[datos.iloc[i]["Proceso"]] # Asignar color al proceso, tomando en cuenta el diccionario
@@ -61,14 +65,16 @@ def round_robin(datos, quantum, switch_time):
 
     ax.set_ylim(0, 50)
     ax.set_xlim(0, )
-    ax.set_xlabel('Quantums')
+    ax.set_xlabel('ms')
     ax.set_yticks([10], labels=['Procesos'])
     ax.grid(False)
     plt.show()
     CalcularDatos(datos)
+    print("\nDatos de cada proceso:")
     print(datos)
-    print("Tiempo vuelta en promedio: %s" % datos["Tiempo vuelta"].mean())
-    print("Tiempo vuelta en espera: %s" % datos["Tiempo espera"].mean())
+    print("\nPromedios:")
+    print("Promedio del tiempo de vuelta: %s" % datos["Tiempo vuelta"].mean())
+    print("Promedio del tiempo de espera: %s" % datos["Tiempo espera"].mean())
 
 # modificarla para que quede con los intercambios
 def CrearGrafica(datos, index, row, ax, c, color, quantum, switch_time):
@@ -76,10 +82,10 @@ def CrearGrafica(datos, index, row, ax, c, color, quantum, switch_time):
     if tiempo_llegada > c:
         c = tiempo_llegada
     ax.broken_barh([(c, quantum)], (0, 9), facecolors=color)
+    if pd.isna(row["CPU Primera Vez"]) or row["CPU Primera Vez"] is None:  
+        datos.at[index, "CPU Primera Vez"] = c
     c += quantum
     c += switch_time
-    if pd.isna(row["CPU Primera Vez"]) or row["CPU Primera Vez"] is None:  # Add this condition
-        datos.at[index, "CPU Primera Vez"] = c
     datos.at[index, "CPU Ultima Vez"] = c
     return c, ax, datos
 
