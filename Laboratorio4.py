@@ -1,6 +1,5 @@
 import pandas as pd
 import matplotlib.pyplot as plt
-import random
 
 # funcion para el menu de inicio
 def MenuInicio():
@@ -42,10 +41,11 @@ def round_robin(datos, quantum, switch_time):
     c = 0
     queue = list(range(len(datos))) # creacion cola de procesos
     added_to_graph = [False] * len(datos)  # lista para verificar que proceso ha sido añadido a la grafica (para las etiquetas)
+    current_time = 0  # para controlar cuantos ms
 
     print("\nCola de procesos:")
     while queue:
-        print([datos.iloc[process]["Proceso"] for process in queue])  # imprimir la cola de procesos
+        print([datos.iloc[process]["Proceso"] for process in queue if datos.iloc[process]["Tiempo llegada"] <= current_time])  # imprimir la cola de procesos
         i = queue.pop(0)
         row = datos.iloc[i]
         color = color_map[datos.iloc[i]["Proceso"]] # Asignar color al proceso, tomando en cuenta el diccionario
@@ -58,9 +58,11 @@ def round_robin(datos, quantum, switch_time):
         if row["NCPU"] > quantum:
             c, ax, datos = CrearGrafica(datos, i, row, ax, c, color, quantum, switch_time)
             datos.at[i, "NCPU"] -= quantum
-            queue.append(i)        
+            queue.append(i)   
+            current_time += quantum + switch_time   
         else:
             c, ax, datos = CrearGrafica(datos, i, row, ax, c, color, row["NCPU"], switch_time)
+            current_time += row["NCPU"] + switch_time
         Tp = datos.at[i, "CPU Primera Vez"]
 
     ax.set_ylim(0, 50)
@@ -75,6 +77,7 @@ def round_robin(datos, quantum, switch_time):
     print("\nPromedios:")
     print("Promedio del tiempo de vuelta: %s" % datos["Tiempo vuelta"].mean())
     print("Promedio del tiempo de espera: %s" % datos["Tiempo espera"].mean())
+    print("Tiempo total CPU: %s" % current_time)
 
 # modificarla para que quede con los intercambios
 def CrearGrafica(datos, index, row, ax, c, color, quantum, switch_time):
