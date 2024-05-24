@@ -49,7 +49,7 @@ def MenuInicio():
     round_robin(tablaProcesoRR, quantum, switch_time)
 
 def round_robin(datos, quantum, switch_time):
-    colores = ["blue", "red", "green", "cyan", "brown", "purple", "olive", "gray", "orange"]
+    colores = ["blue", "yellow", "green", "cyan", "brown", "purple", "olive", "gray", "orange"]
     color_map = {process: color for process, color in zip(datos["Proceso"], colores)}
     datos = datos.sort_values(by="Tiempo llegada", ascending=True)
     fig, ax = plt.subplots()
@@ -70,8 +70,10 @@ def round_robin(datos, quantum, switch_time):
         # Manejo de procesos en E/S
         for es_process, es_end_time in es_queue[:]:
             if current_time >= es_end_time:
-                queue.append(es_process)
                 es_queue.remove((es_process, es_end_time))
+                # Verificar si el proceso tiene más tiempo de CPU para ejecutar después de la operación de E/S
+                if datos.at[es_process, "NCPU Restante"] > 0:
+                    queue.append(es_process)
 
         if not queue:
             current_time += 1
@@ -109,8 +111,12 @@ def round_robin(datos, quantum, switch_time):
                 datos.at[i, "E/S actual"] += 1
                 es_queue.append((i, current_time + es_time))
 
+                # Agregar el proceso a la cola de procesos para ejecutar el tiempo de CPU restante
+                queue.append(i)
+
                 # Añadir la E/S a la gráfica
-                ax.broken_barh([(c, es_time)], (0, 9), facecolors='yellow')  # Agregar la duración de E/S a la gráfica
+                ax.broken_barh([(c, es_time)], (0, 9), facecolors='red')  # Agregar la duración de E/S a la gráfica
+                ax.annotate("E/S", (c, 15), fontsize=9, ha='left', color='red')  # Agregar etiqueta de E/S
                 c += es_time
                 current_time += es_time
             else:
@@ -146,7 +152,8 @@ def CrearGrafica(datos, index, row, ax, c, color, quantum, switch_time):
 # funcion para calcular los tiempos de vuelta y espera
 def CalcularDatos(datos):
     for index, row in datos.iterrows(): 
-        datos.at[index,"Tiempo vuelta"] = row["CPU Ultima Vez"] - row["Tiempo llegada"]
+        total_es_duration = sum(row["Duracion E/S"])  # Sumar todas las duraciones de E/S
+        datos.at[index,"Tiempo vuelta"] = row["CPU Ultima Vez"] - row["Tiempo llegada"] - total_es_duration
         datos.at[index,"Tiempo espera"] = row["CPU Primera Vez"] - row["Tiempo llegada"]
     return datos
 
