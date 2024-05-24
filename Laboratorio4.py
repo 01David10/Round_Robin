@@ -1,3 +1,5 @@
+# implementacion del algoritmo de planificacion de procesos Round Robin
+
 import pandas as pd
 import matplotlib.pyplot as plt
 
